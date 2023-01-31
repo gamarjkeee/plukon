@@ -1,2 +1,2 @@
 
-https://gamarjkeee.github.io/plukon/home.html
+https://gamarjkeee.github.io/plukon/index.html
