@@ -1,6 +1,6 @@
 (() => {
     "use strict";
-    const modules_flsModules = {};
+    const flsModules = {};
     function isWebp() {
         function testWebP(callback) {
             let webP = new Image;
@@ -14,6 +14,26 @@
             document.documentElement.classList.add(className);
         }));
     }
+    let isMobile = {
+        Android: function() {
+            return navigator.userAgent.match(/Android/i);
+        },
+        BlackBerry: function() {
+            return navigator.userAgent.match(/BlackBerry/i);
+        },
+        iOS: function() {
+            return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+        },
+        Opera: function() {
+            return navigator.userAgent.match(/Opera Mini/i);
+        },
+        Windows: function() {
+            return navigator.userAgent.match(/IEMobile/i);
+        },
+        any: function() {
+            return isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows();
+        }
+    };
     function addLoadedClass() {
         if (!document.documentElement.classList.contains("loading")) window.addEventListener("load", (function() {
             setTimeout((function() {
@@ -23,6 +43,17 @@
     }
     function getHash() {
         if (location.hash) return location.hash.replace("#", "");
+    }
+    function fullVHfix() {
+        const fullScreens = document.querySelectorAll("[data-fullscreen]");
+        if (fullScreens.length && isMobile.any()) {
+            window.addEventListener("resize", fixHeight);
+            function fixHeight() {
+                let vh = .01 * window.innerHeight;
+                document.documentElement.style.setProperty("--vh", `${vh}px`);
+            }
+            fixHeight();
+        }
     }
     let bodyLockStatus = true;
     let bodyLockToggle = (delay = 500) => {
@@ -74,7 +105,7 @@
         bodyUnlock();
         document.documentElement.classList.remove("menu-open");
     }
-    function functions_FLS(message) {
+    function FLS(message) {
         setTimeout((() => {
             if (window.FLS) console.log(message);
         }), 0);
@@ -84,44 +115,6 @@
             return self.indexOf(item) === index;
         }));
     }
-    let gotoblock_gotoBlock = (targetBlock, noHeader = false, speed = 500, offsetTop = 0) => {
-        const targetBlockElement = document.querySelector(targetBlock);
-        if (targetBlockElement) {
-            let headerItem = "";
-            let headerItemHeight = 0;
-            if (noHeader) {
-                headerItem = "header.header";
-                const headerElement = document.querySelector(headerItem);
-                if (!headerElement.classList.contains("_header-scroll")) {
-                    headerElement.style.cssText = `transition-duration: 0s;`;
-                    headerElement.classList.add("_header-scroll");
-                    headerItemHeight = headerElement.offsetHeight;
-                    headerElement.classList.remove("_header-scroll");
-                    setTimeout((() => {
-                        headerElement.style.cssText = ``;
-                    }), 0);
-                } else headerItemHeight = headerElement.offsetHeight;
-            }
-            let options = {
-                speedAsDuration: true,
-                speed,
-                header: headerItem,
-                offset: offsetTop,
-                easing: "easeOutQuad"
-            };
-            document.documentElement.classList.contains("menu-open") ? menuClose() : null;
-            if ("undefined" !== typeof SmoothScroll) (new SmoothScroll).animateScroll(targetBlockElement, "", options); else {
-                let targetBlockElementPosition = targetBlockElement.getBoundingClientRect().top + scrollY;
-                targetBlockElementPosition = headerItemHeight ? targetBlockElementPosition - headerItemHeight : targetBlockElementPosition;
-                targetBlockElementPosition = offsetTop ? targetBlockElementPosition - offsetTop : targetBlockElementPosition;
-                window.scrollTo({
-                    top: targetBlockElementPosition,
-                    behavior: "smooth"
-                });
-            }
-            functions_FLS(`[gotoBlock]: Юхуу...їдемо до ${targetBlock}`);
-        } else functions_FLS(`[gotoBlock]: Йой... Такого блоку немає на сторінці: ${targetBlock}`);
-    };
     function ssr_window_esm_isObject(obj) {
         return null !== obj && "object" === typeof obj && "constructor" in obj && obj.constructor === Object;
     }
@@ -3482,7 +3475,7 @@
             this.scrollWatcherLogging(`Я перестав стежити за ${targetElement.classList}`);
         }
         scrollWatcherLogging(message) {
-            this.config.logging ? functions_FLS(`[Спостерігач]: ${message}`) : null;
+            this.config.logging ? FLS(`[Спостерігач]: ${message}`) : null;
         }
         scrollWatcherCallback(entry, observer) {
             const targetElement = entry.target;
@@ -3495,7 +3488,45 @@
             }));
         }
     }
-    modules_flsModules.watcher = new ScrollWatcher({});
+    flsModules.watcher = new ScrollWatcher({});
+    let gotoBlock = (targetBlock, noHeader = false, speed = 500, offsetTop = 0) => {
+        const targetBlockElement = document.querySelector(targetBlock);
+        if (targetBlockElement) {
+            let headerItem = "";
+            let headerItemHeight = 0;
+            if (noHeader) {
+                headerItem = "header.header";
+                const headerElement = document.querySelector(headerItem);
+                if (!headerElement.classList.contains("_header-scroll")) {
+                    headerElement.style.cssText = `transition-duration: 0s;`;
+                    headerElement.classList.add("_header-scroll");
+                    headerItemHeight = headerElement.offsetHeight;
+                    headerElement.classList.remove("_header-scroll");
+                    setTimeout((() => {
+                        headerElement.style.cssText = ``;
+                    }), 0);
+                } else headerItemHeight = headerElement.offsetHeight;
+            }
+            let options = {
+                speedAsDuration: true,
+                speed,
+                header: headerItem,
+                offset: offsetTop,
+                easing: "easeOutQuad"
+            };
+            document.documentElement.classList.contains("menu-open") ? menuClose() : null;
+            if ("undefined" !== typeof SmoothScroll) (new SmoothScroll).animateScroll(targetBlockElement, "", options); else {
+                let targetBlockElementPosition = targetBlockElement.getBoundingClientRect().top + scrollY;
+                targetBlockElementPosition = headerItemHeight ? targetBlockElementPosition - headerItemHeight : targetBlockElementPosition;
+                targetBlockElementPosition = offsetTop ? targetBlockElementPosition - offsetTop : targetBlockElementPosition;
+                window.scrollTo({
+                    top: targetBlockElementPosition,
+                    behavior: "smooth"
+                });
+            }
+            FLS(`[gotoBlock]: Юхуу...їдемо до ${targetBlock}`);
+        } else FLS(`[gotoBlock]: Йой... Такого блоку немає на сторінці: ${targetBlock}`);
+    };
     let addWindowScrollEvent = false;
     function pageNavigation() {
         document.addEventListener("click", pageNavigationAction);
@@ -3509,14 +3540,14 @@
                     const noHeader = gotoLink.hasAttribute("data-goto-header") ? true : false;
                     const gotoSpeed = gotoLink.dataset.gotoSpeed ? gotoLink.dataset.gotoSpeed : 500;
                     const offsetTop = gotoLink.dataset.gotoTop ? parseInt(gotoLink.dataset.gotoTop) : 0;
-                    if (modules_flsModules.fullpage) {
+                    if (flsModules.fullpage) {
                         const fullpageSection = document.querySelector(`${gotoLinkSelector}`).closest("[data-fp-section]");
                         const fullpageSectionId = fullpageSection ? +fullpageSection.dataset.fpId : null;
                         if (null !== fullpageSectionId) {
-                            modules_flsModules.fullpage.switchingSection(fullpageSectionId);
+                            flsModules.fullpage.switchingSection(fullpageSectionId);
                             document.documentElement.classList.contains("menu-open") ? menuClose() : null;
                         }
-                    } else gotoblock_gotoBlock(gotoLinkSelector, noHeader, gotoSpeed, offsetTop);
+                    } else gotoBlock(gotoLinkSelector, noHeader, gotoSpeed, offsetTop);
                     e.preventDefault();
                 }
             } else if ("watcherCallback" === e.type && e.detail) {
@@ -3539,7 +3570,7 @@
         if (getHash()) {
             let goToHash;
             if (document.querySelector(`#${getHash()}`)) goToHash = `#${getHash()}`; else if (document.querySelector(`.${getHash()}`)) goToHash = `.${getHash()}`;
-            goToHash ? gotoblock_gotoBlock(goToHash, true, 500, 20) : null;
+            goToHash ? gotoBlock(goToHash, true, 500, 20) : null;
         }
     }
     function headerScroll() {
@@ -3580,6 +3611,91 @@
     isWebp();
     addLoadedClass();
     menuInit();
+    fullVHfix();
     pageNavigation();
     headerScroll();
+    "use strict";
+    document.addEventListener("DOMContentLoaded", (function() {
+        const form = document.getElementById("form");
+        form.addEventListener("submit", formSend);
+        async function formSend(e) {
+            e.preventDefault();
+            let error = formValidate(form);
+            let formData = new FormData(form);
+            formData.append("image", formImage.files[0]);
+            if (0 === error) {
+                form.classList.add("_sending");
+                let response = await fetch("sendmail.php", {
+                    method: "POST",
+                    body: formData
+                });
+                if (response.ok) {
+                    let result = await response.json();
+                    alert(result.message);
+                    formPreview.innerHTML = "";
+                    form.reset();
+                    form.classList.remove("_sending");
+                } else {
+                    alert("Помилка");
+                    form.classList.remove("_sending");
+                }
+            } else alert("Заповніть всі обов'язкові поля");
+        }
+        function formValidate(form) {
+            let error = 0;
+            let formReq = document.querySelectorAll("._req");
+            for (let index = 0; index < formReq.length; index++) {
+                const input = formReq[index];
+                formRemoveError(input);
+                if (input.classList.contains("_email")) {
+                    if (emailTest(input)) {
+                        formAddError(input);
+                        error++;
+                    }
+                } else if ("checkbox" === input.getAttribute("type") && false === input.checked) {
+                    formAddError(input);
+                    error++;
+                } else if ("" === input.value) {
+                    formAddError(input);
+                    error++;
+                }
+            }
+            return error;
+        }
+        function formAddError(input) {
+            input.parentElement.classList.add("_error");
+            input.classList.add("_error");
+        }
+        function formRemoveError(input) {
+            input.parentElement.classList.remove("_error");
+            input.classList.remove("_error");
+        }
+        function emailTest(input) {
+            return !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,8})+$/.test(input.value);
+        }
+        const formImage = document.getElementById("formImage");
+        const formPreview = document.getElementById("formPreview");
+        formImage.addEventListener("change", (() => {
+            uploadFile(formImage.files[0]);
+        }));
+        function uploadFile(file) {
+            if (![ "image/jpeg", "image/png", "image/gif" ].includes(file.type)) {
+                alert("Дозволені тільки зображення.");
+                formImage.value = "";
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Файл має бути меншим 2 МБ.");
+                return;
+            }
+            var reader = new FileReader;
+            reader.onload = function(e) {
+                formPreview.innerHTML = `<img src="${e.target.result}" alt="Фото">`;
+            };
+            reader.onerror = function(e) {
+                alert("Помилка");
+            };
+            reader.readAsDataURL(file);
+        }
+    }));
 })();
